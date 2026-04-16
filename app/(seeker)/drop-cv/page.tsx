@@ -50,7 +50,7 @@ export default function DropCVPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
-    if (role !== "seeker" && role !== "candidate") {
+    if (role === "employer") {
       router.replace("/");
     }
 
