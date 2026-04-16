@@ -1,5 +1,7 @@
 "use client";
 
+// Hiblink Tech Career Gateway
+
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
