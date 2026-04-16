@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useState, useCallback } from "react";
 import Image from "next/image";
-import { Loader2, ShieldCheck } from "lucide-react";
+import { Loader2, ShieldCheck, Upload, Briefcase } from "lucide-react";
 import { useAppStore } from "@/lib/store";
 import { useTelegram } from "@/hooks/useTelegram";
 
@@ -36,13 +36,8 @@ export default function Home() {
             
             if (data.role) {
               setRole(data.role);
-              if (data.role === "seeker") {
-                router.replace("/jobs");
-                return;
-              } else {
-                router.replace("/dashboard");
-                return;
-              }
+              router.replace("/profile");
+              return;
             }
           }
         }
@@ -57,36 +52,23 @@ export default function Home() {
     authenticateUser();
   }, [isReady, user, initData, router, setRole]);
 
-  const handleRoleSelect = useCallback(async (selectedRole: "seeker" | "employer") => {
+  const handleDropCV = useCallback(() => {
     if (tg?.HapticFeedback) {
       tg.HapticFeedback.impactOccurred("medium");
     }
+    router.push("/drop-cv");
+  }, [tg, router]);
 
-    try {
-      await fetch("/api/auth", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          telegramId: user?.id, 
-          role: selectedRole 
-        }),
-      });
-    } catch (error) {
-      console.error("Error saving role:", error);
+  const handleBrowseRoles = useCallback(() => {
+    if (tg?.HapticFeedback) {
+      tg.HapticFeedback.impactOccurred("light");
     }
-
-    setRole(selectedRole);
-    
-    if (selectedRole === "seeker") {
-      router.push("/profile");
-    } else {
-      router.push("/dashboard");
-    }
-  }, [tg, user, setRole, router]);
+    router.push("/jobs");
+  }, [tg, router]);
 
   if (!isReady || checking || authenticating) {
     return (
-      <div className="h-screen flex flex-col items-center justify-center bg-background p-4">
+      <div className="h-screen flex flex-col items-center justify-center bg-hiblink-dark p-4">
         <div className="w-14 h-14 rounded-full bg-hiblink-blue/10 flex items-center justify-center mb-4">
           <Loader2 className="w-7 h-7 text-hiblink-blue animate-spin" />
         </div>
@@ -104,77 +86,44 @@ export default function Home() {
   }
 
   return (
-    <div className="h-screen bg-background overflow-hidden flex flex-col">
-      <div className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 py-6">
+    <div className="h-screen bg-hiblink-dark overflow-hidden flex flex-col">
+      <div className="flex-1 flex flex-col max-w-md mx-auto w-full px-4 py-6 justify-between">
         <div className="mb-6">
-          <div className="w-48 h-16 rounded-2xl bg-obsidian border border-white/10 flex items-center justify-center overflow-hidden mb-6">
+          <div className="w-40 h-14 rounded-2xl flex items-center justify-center mb-8 mt-4">
             <Image
               src="/images/hiblink-tech-logo-white.png"
               alt="Hiblink Tech"
-              width={180}
-              height={48}
+              width={160}
+              height={56}
               unoptimized
               className="w-full h-full object-contain"
             />
           </div>
-          <div className="text-left px-2">
-            <h1 className="text-lg font-light text-text-primary">
-              Welcome to
+          <div className="text-left">
+            <h1 className="text-3xl font-extrabold text-hiblink-light leading-tight">
+              Build Your <br />
+              <span className="text-hiblink-blue">Tech Career</span>
             </h1>
-            <p className="text-6xl font-extrabold text-hiblink-blue mt-1 leading-tight">
-              {user?.first_name || "Hiblink Tech"}
-            </p>
-            <p className="text-text-muted text-sm mt-2">
-              Your tech career starts here
+            <p className="text-text-muted text-sm mt-3">
+              Join Hiblink's talent network. Drop your CV and get matched with opportunities in Fintech, Agrotech, Healthtech, and more.
             </p>
           </div>
         </div>
 
-        <div className="flex-1 flex flex-col gap-4 justify-center">
+        <div className="flex flex-col gap-3">
           <button
-            onClick={() => handleRoleSelect("seeker")}
-            className="group relative overflow-hidden bg-obsidian rounded-2xl border border-white/10 p-5 transition-all hover:border-hiblink-blue/50 active:scale-[0.98]"
+            onClick={handleDropCV}
+            className="w-full py-4 bg-hiblink-blue text-white rounded-2xl font-bold text-base flex items-center justify-center gap-2 shadow-lg shadow-hiblink-blue/30 active:scale-[0.98] transition-all"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-hiblink-blue/0 to-hiblink-blue/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-hiblink-blue flex items-center justify-center shadow-lg shadow-hiblink-blue/30">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                </svg>
-              </div>
-              <div className="text-left flex-1">
-                <h2 className="text-lg font-bold text-text-primary">Seeker</h2>
-                <p className="text-text-muted text-xs">
-                  Build portfolio & find jobs
-                </p>
-              </div>
-              <svg className="w-5 h-5 text-text-muted group-hover:text-hiblink-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
+            <Upload className="w-5 h-5" />
+            Drop Your CV
           </button>
-
+          
           <button
-            onClick={() => handleRoleSelect("employer")}
-            className="group relative overflow-hidden bg-obsidian rounded-2xl border border-white/10 p-5 transition-all hover:border-hiblink-blue/50 active:scale-[0.98]"
+            onClick={handleBrowseRoles}
+            className="w-full py-4 bg-transparent border-2 border-hiblink-orange text-hiblink-orange rounded-2xl font-bold text-base active:scale-[0.98] transition-all"
           >
-            <div className="absolute inset-0 bg-gradient-to-r from-hiblink-blue/0 to-hiblink-blue/20 opacity-0 group-hover:opacity-100 transition-opacity" />
-            <div className="relative flex items-center gap-4">
-              <div className="w-14 h-14 rounded-2xl bg-hiblink-blue flex items-center justify-center shadow-lg shadow-hiblink-blue/30">
-                <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="text-left flex-1">
-                <h2 className="text-lg font-bold text-text-primary">Employer</h2>
-                <p className="text-text-muted text-xs">
-                  Post jobs & discover talent
-                </p>
-              </div>
-              <svg className="w-5 h-5 text-text-muted group-hover:text-hiblink-blue transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </div>
+            Browse Open Roles
           </button>
         </div>
 
